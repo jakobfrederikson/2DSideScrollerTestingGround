@@ -31,6 +31,15 @@ public class PlayerMovement : MonoBehaviour
     {
         onGround = Physics2D.OverlapCircle(feetPos.position, checkRadius, whatIsGround);
 
+        if (moveInput > 0)
+        {
+            transform.eulerAngles = new Vector3(0, 0, 0);
+        }
+        else if (moveInput < 0)
+        {
+            transform.eulerAngles = new Vector3(0, 180, 0);
+        }
+
         if (Input.GetKeyDown(KeyCode.Space) && onGround == true)
         {
             isJumping = true;
