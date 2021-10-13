@@ -6,6 +6,7 @@ public class PlayerMovement : MonoBehaviour
 {
     Rigidbody2D rb;
     public float speed;
+    float moveInput;
 
     public float jumpForce;
     public float jumpTimeCounter;
@@ -13,10 +14,10 @@ public class PlayerMovement : MonoBehaviour
 
     private bool onGround;
     public LayerMask whatIsGround;
-    private bool stoppedJumping;
+    private bool isJumping;
 
-    public Transform groundCheck;
-    public float groundCheckRadius;
+    public Transform feetPos;
+    public float checkRadius;
 
     // Start is called before the first frame update
     void Start()
@@ -28,60 +29,38 @@ public class PlayerMovement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        onGround = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, whatIsGround);
+        onGround = Physics2D.OverlapCircle(feetPos.position, checkRadius, whatIsGround);
 
-        if(onGround)
+        if (Input.GetKeyDown(KeyCode.Space) && onGround == true)
         {
+            isJumping = true;
             jumpTimeCounter = jumpTime;
+            rb.velocity = Vector2.up * jumpForce;
+        }
+
+        if (Input.GetKey(KeyCode.Space) && isJumping == true)
+        {
+            if (jumpTimeCounter > 0)
+            {
+                rb.velocity = Vector2.up * jumpForce;
+                jumpTimeCounter -= Time.deltaTime;
+            }
+            else
+            {
+                isJumping = false;
+            }
+        }
+
+        if (Input.GetKeyUp(KeyCode.Space))
+        {
+            isJumping = false;
         }
     }
 
     private void FixedUpdate()
     {
-        Move();
-        Jump();
-    }
-
-    void Move()
-    {
-        float horizontal = Input.GetAxisRaw("Horizontal");
-        float moveBy = horizontal * speed;
-        rb.velocity = new Vector2(moveBy, rb.velocity.y);
-    }
-
-    void Jump()
-    {
-        // If player is on the ground and presses space bar.
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            if (onGround)
-            {
-                rb.velocity = new Vector2(rb.velocity.x, jumpForce);
-                stoppedJumping = false;              
-            }            
-        }
-
-        // If player has jumped and is still holding space bar.
-        if (Input.GetKey(KeyCode.Space) && !stoppedJumping)
-        {
-            if (jumpTimeCounter > 0)
-            {
-                rb.velocity = new Vector2(rb.velocity.x, jumpForce);
-                jumpTimeCounter -= Time.deltaTime;
-            }
-        }
-
-        // If player stopped holding down space bar.
-        if (Input.GetKeyUp(KeyCode.Space))
-        {
-            jumpTimeCounter = 0;
-            stoppedJumping = true;
-        }
-    }
-
-    void OnDrawGizmos()
-    {
-        Gizmos.DrawSphere(groundCheck.position, groundCheckRadius);
+        moveInput = Input.GetAxisRaw("Horizontal");
+        rb.velocity = new Vector2(moveInput * speed, rb.velocity.y);
     }
 }
 
